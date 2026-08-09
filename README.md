@@ -126,8 +126,8 @@ Secrets_reveal/
 ├── main.lua                              all mod logic
 ├── metadata.xml                          mod manifest, carries the Workshop id
 ├── resources/gfx/
-│   ├── secretsreveal_markers.anm2        4-frame marker animation
-│   └── secretsreveal_markers.png         128x32 sheet (4 x 32x32 markers)
+│   ├── secretsreveal_markers.anm2        5-frame marker animation
+│   └── secretsreveal_markers.png         160x32 sheet (5 x 32x32 markers)
 ├── tools/
 │   ├── make_markers.ps1                  regenerates the marker sheet
 │   └── make_preview.ps1                  regenerates the Workshop thumbnail
