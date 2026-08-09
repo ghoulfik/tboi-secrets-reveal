@@ -2,6 +2,11 @@
 
 A Binding of Isaac: Repentance mod that reveals what the floor is hiding.
 
+![Markers over tinted rocks, super tinted rocks and crawlspaces](workshop/screenshot-2-on.png)
+
+*Same room [without the mod](workshop/screenshot-1-off.png). Note the `?` icons
+that appear on the minimap: those are the secret rooms being revealed.*
+
 ## What it does
 
 **On the map**
