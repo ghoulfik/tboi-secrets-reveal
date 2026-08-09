@@ -137,11 +137,16 @@ local function drawText(text, x, y, alpha, scale)
   font:DrawStringScaled(text, x, y, scale, scale, KColor(1, 1, 1, alpha), 0, false)
 end
 
+-- Must be WorldToScreen, not WorldToRenderPosition. The latter is relative to
+-- the room's render origin and carries no camera scroll, so markers freeze on
+-- screen the moment a room is large enough for the camera to follow the player.
+-- Rooms that never scroll hide the difference entirely.
 local function worldToScreen(pos)
-  if Isaac.WorldToRenderPosition then
-    return Isaac.WorldToRenderPosition(pos)
+  if Isaac.WorldToScreen then
+    return Isaac.WorldToScreen(pos)
   end
-  return Isaac.WorldToScreen(pos)
+  -- Fallback: undo the scroll by hand.
+  return Isaac.WorldToRenderPosition(pos) - Game():GetRoom():GetRenderScrollOffset()
 end
 
 ----------------------------------------------------------------------
