@@ -22,14 +22,23 @@ local DISPLAY_REVEALED = 5
 
 -- Grid types we care about. The `or` fallbacks keep this working even if a
 -- future patch renames an enum member.
-local GRID_TINTED = GridEntityType.GRID_ROCKT   or 4   -- Tinted Rock
-local GRID_SUPER  = GridEntityType.GRID_ROCK_SS or 22  -- Super Tinted Rock
-local GRID_CRAWL  = GridEntityType.GRID_STAIRS  or 18  -- Crawlspace
+local GRID_TINTED = GridEntityType.GRID_ROCKT     or 4   -- Tinted Rock
+local GRID_SUPER  = GridEntityType.GRID_ROCK_SS   or 22  -- Super Tinted Rock
+local GRID_CRAWL  = GridEntityType.GRID_STAIRS    or 18  -- Crawlspace
+-- Downpour / Dross rubble rock. Breaking one can produce a crawlspace, but the
+-- game rolls for that at destruction time, so this marks a candidate and makes
+-- no promise about what is actually inside.
+local GRID_RUBBLE = GridEntityType.GRID_ROCK_ALT2 or 26
 
 -- Frame indices inside gfx/secretsreveal_markers.anm2
 local MARKER_TINTED = 0
 local MARKER_SUPER  = 1
 local MARKER_CRAWL  = 2
+local MARKER_RUBBLE = 3
+
+-- Candidate markers are drawn fainter: rubble rocks are common in Downpour and
+-- a room full of full-brightness reticles is unreadable.
+local CANDIDATE_ALPHA = 0.55
 
 -- Entity id used for a crawlspace inside a room layout (STB/XML "spawn" id).
 local SPAWN_ID_CRAWLSPACE = 9100
@@ -58,6 +67,7 @@ local DEFAULTS = {
   markCrawl    = true,   -- in-room marker over crawlspaces
   markTinted   = true,   -- in-room marker over tinted rocks
   markSuper    = true,   -- in-room marker over super tinted rocks
+  markRubble   = true,   -- faint marker over rocks that may hide a crawlspace
 
   pulse        = true,   -- markers fade in and out
   scale        = 1.0,    -- marker size multiplier
@@ -272,15 +282,26 @@ local function rescanRoom()
         if cfg.markSuper and isIntactRock(grid) then
           tracked[#tracked + 1] = { pos = grid.Position, frame = MARKER_SUPER }
         end
+      elseif gtype == GRID_RUBBLE then
+        if cfg.markRubble and isIntactRock(grid) then
+          tracked[#tracked + 1] = {
+            pos = grid.Position, frame = MARKER_RUBBLE, faint = true,
+          }
+        end
       end
     end
   end
 end
 
 local function describeRoomContents()
-  local counts = { [MARKER_TINTED] = 0, [MARKER_SUPER] = 0, [MARKER_CRAWL] = 0 }
+  local counts = {
+    [MARKER_TINTED] = 0, [MARKER_SUPER] = 0,
+    [MARKER_CRAWL]  = 0, [MARKER_RUBBLE] = 0,
+  }
   for _, m in ipairs(tracked) do counts[m.frame] = counts[m.frame] + 1 end
 
+  -- Rubble rocks are deliberately left out: most Downpour rooms have several,
+  -- so listing them would put a notice on screen almost continuously.
   local parts = {}
   if counts[MARKER_CRAWL]  > 0 then parts[#parts + 1] = "Crawlspace"        end
   if counts[MARKER_SUPER]  > 0 then parts[#parts + 1] = "Super Tinted Rock" end
@@ -423,10 +444,10 @@ function mod:onRender()
     alpha = 0.6 + 0.35 * math.sin(now * 0.12)
   end
 
-  markerSprite.Color = Color(1, 1, 1, alpha)
   markerSprite.Scale = Vector(cfg.scale, cfg.scale)
 
   for _, m in ipairs(tracked) do
+    markerSprite.Color = Color(1, 1, 1, m.faint and alpha * CANDIDATE_ALPHA or alpha)
     markerSprite:SetFrame("Marker", m.frame)
     markerSprite:Render(worldToScreen(m.pos), Vector.Zero, Vector.Zero)
   end
@@ -503,6 +524,7 @@ local function setupModConfigMenu()
   addToggle("Markers", "markCrawl",   "Crawlspaces",         { "Marker over crawlspaces in the room" })
   addToggle("Markers", "markTinted",  "Tinted Rocks",        { "Marker over tinted rocks in the room" })
   addToggle("Markers", "markSuper",   "Super Tinted Rocks",  { "Marker over super tinted rocks in the room" })
+  addToggle("Markers", "markRubble",  "Crawlspace candidates", { "Faint marker over Downpour/Dross rubble", "rocks that may hide a crawlspace" })
   addToggle("Markers", "pulse",       "Pulsing markers",     { "Fade markers in and out" })
   addToggle("Markers", "notify",      "On-screen notices",   { "Short text when a floor or room holds a secret" })
 

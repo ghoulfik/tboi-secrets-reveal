@@ -19,7 +19,14 @@ A Binding of Isaac: Repentance mod that reveals what the floor is hiding.
 | --- | --- |
 | Cyan diamond | Tinted Rock |
 | Gold star | Super Tinted Rock |
-| Violet arrow | Crawlspace |
+| Violet arrow (solid) | Crawlspace |
+| Green arrow (hollow, faint) | Downpour/Dross rubble rock that *may* hide a crawlspace |
+
+The green marker is a **candidate, not a promise**. The game rolls for a
+crawlspace when the rock is destroyed, not when the floor is generated, so
+there is nothing to read in advance — it only tells you which rocks are worth
+breaking. It's drawn at 55% alpha because those rocks are common, and left out
+of the room notices for the same reason.
 
 Rock markers disappear the moment the rock is broken. Crawlspaces that get
 uncovered mid-fight (Downpour rubble rocks, bombed floors) are picked up
