@@ -151,13 +151,26 @@ local function drawText(text, x, y, alpha, scale)
   font:DrawStringScaled(text, x, y, scale, scale, KColor(1, 1, 1, alpha), 0, false)
 end
 
--- Set once per room scan rather than per marker: the dimension cannot change
--- without a room change, and probing it is a guarded call.
+-- Both set once per room scan rather than per marker: the dimension cannot
+-- change without a room change, and probing it is a guarded call.
 local roomMirrored = false
+local mirrorAxisX  = 0
 
 local function isMirrorWorld(room)
   local ok, mirrored = pcall(function() return room:IsMirrorWorld() end)
   return ok and mirrored == true
+end
+
+-- The horizontal middle of the room, derived from its static bounds.
+-- GetCenterPos is NOT usable here: in a room large enough to scroll it follows
+-- the camera, so reflecting about it made markers slide sideways as the player
+-- moved. Top-left and bottom-right are fixed for the life of the room.
+local function mirrorAxisFor(room)
+  local ok, axis = pcall(function()
+    return (room:GetTopLeftPos().X + room:GetBottomRightPos().X) * 0.5
+  end)
+  if ok and axis then return axis end
+  return room:GetCenterPos().X
 end
 
 -- Must be WorldToScreen, not WorldToRenderPosition. The latter is relative to
@@ -169,10 +182,9 @@ local function worldToScreen(pos)
 
   -- Downpour II's mirror dimension draws the room flipped horizontally while
   -- grid entities keep their unmirrored world coordinates, so reflect X about
-  -- the room centre or every marker lands on the wrong side of the room.
+  -- the room's midline or every marker lands on the wrong side of the room.
   if roomMirrored then
-    local center = room:GetCenterPos()
-    pos = Vector(center.X * 2 - pos.X, pos.Y)
+    pos = Vector(mirrorAxisX * 2 - pos.X, pos.Y)
   end
 
   if Isaac.WorldToScreen then
@@ -289,6 +301,7 @@ local function rescanRoom()
   local size = room:GetGridSize()
 
   roomMirrored = isMirrorWorld(room)
+  if roomMirrored then mirrorAxisX = mirrorAxisFor(room) end
 
   for i = 0, size - 1 do
     local grid = room:GetGridEntity(i)
