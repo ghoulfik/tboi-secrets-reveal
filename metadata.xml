@@ -2,7 +2,45 @@
 <metadata>
 	<name>Secrets Reveal</name>
 	<directory>secrets-reveal</directory>
-	<description>Reveals Secret, Super Secret and Ultra Secret Rooms on the map, shows which rooms hold a Crawlspace, and marks Crawlspaces, Tinted Rocks and Super Tinted Rocks inside the room.</description>
+	<description>Reveals what the floor is hiding, without touching anything else.
+
+[h1]On the map[/h1]
+As soon as you arrive on a floor, these are drawn on the minimap with their icons:
+[list]
+[*]Secret Room
+[*]Super Secret Room
+[*]Ultra Secret Room
+[*]Any room whose layout contains a Crawlspace
+[/list]
+Same idea as the Blue Map: it shows you [i]which wall[/i] to bomb, not the door itself.
+
+[h1]In the room[/h1]
+A pulsing reticle is drawn over:
+[list]
+[*][b]Cyan diamond[/b] - Tinted Rock
+[*][b]Gold star[/b] - Super Tinted Rock
+[*][b]Violet arrow[/b] - Crawlspace
+[/list]
+Markers vanish the moment a rock breaks, and crawlspaces uncovered mid-fight (Downpour rubble, bombed floors) are picked up automatically.
+
+[h1]Controls[/h1]
+[list]
+[*][b]F5[/b] - toggle the whole mod
+[*][b]F6[/b] - show/hide the bottom-left notices
+[/list]
+Both keys are rebindable through Mod Config Menu, which also exposes per-room-type and per-marker toggles, marker size and text size. Mod Config Menu is optional - without it the defaults apply and both keys work.
+
+[h1]Notes[/h1]
+[list]
+[*]Lua only, no content overrides. It does [b]not[/b] disable achievements.
+[*]Turning the mod off does not un-reveal rooms already on the map - the game has no API for hiding a room again. It stops revealing new ones.
+[*]Crawlspaces created at random from Downpour/Dross rubble rocks cannot be known in advance; those get the in-room marker once they appear.
+[/list]
+
+[hr][/hr]
+Source, issues and changelog: https://github.com/ghoulfik/tboi-secrets-reveal</description>
 	<version>1.0</version>
-	<visibility></visibility>
+	<visibility>Public</visibility>
+	<tag id="Lua"/>
+	<tag id="Tweaks"/>
 </metadata>
