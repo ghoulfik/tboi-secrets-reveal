@@ -48,7 +48,7 @@ Copy this folder into the game's `mods` directory — note that this lives in th
 Or clone straight into it:
 
 ```
-git clone https://github.com/USER/REPO.git secrets-reveal
+git clone https://github.com/ghoulfik/tboi-secrets-reveal.git secrets-reveal
 ```
 
 Then launch the game, open **Mods** from the title screen, and make sure
