@@ -28,16 +28,19 @@ that appear on the minimap: those are the secret rooms being revealed.*
 | Cyan diamond | Tinted Rock |
 | Gold star | Super Tinted Rock |
 | Violet arrow (solid) | Crawlspace |
-| Green arrow (hollow, faint) | Rock or skull with an X mark, which *may* hide a crawlspace |
+| Green arrow (hollow, faint) | Skull carrying an X mark, which drops a reward when broken |
 
-The green marker is a **candidate, not a promise**. The game rolls for the
-contents when the rock is destroyed, not when the floor is generated, so there
-is nothing to read in advance — it only tells you which rocks are worth
-breaking. It's drawn at 55% alpha and left out of the room notices so it never
-competes with the markers that identify something confirmed.
+The green marker is drawn at 55% alpha and left out of the room notices so it
+never competes with the markers that point at a crawlspace or a tinted rock.
+
+**It does not predict crawlspaces.** An earlier version of this file claimed it
+marked Downpour/Dross rocks that might hide one; that was wrong. The grid type
+it matches is the X-marked skull and nothing else. Crawlspaces that a rock
+produces are rolled at the moment the rock breaks, so no mod can flag them in
+advance — the mod picks them up from the in-room rescan once they exist.
 
 Rock markers disappear the moment the rock is broken. Crawlspaces that get
-uncovered mid-fight (Downpour rubble rocks, bombed floors) are picked up
+uncovered mid-room (broken rocks, bombed floors) are picked up
 automatically — the room is re-scanned a few times a second.
 
 A short line of small text in the **bottom-left corner** summarises each new
@@ -106,7 +109,7 @@ per-mod, so they survive restarts either way.
 * Crawlspace room detection reads the room's layout data. A handful of layouts
   place a crawlspace in a weighted slot shared with other objects, so a very
   small number of flagged rooms may turn out not to have one.
-* Crawlspaces created at random from Downpour/Dross rubble rocks cannot be
+* Crawlspaces that a breaking rock produces cannot be
   known ahead of time — those are only marked once they actually appear, via
   the in-room marker.
 
@@ -115,15 +118,27 @@ per-mod, so they survive restarts either way.
 ```
 Secrets_reveal/
 ├── main.lua                              all mod logic
-├── metadata.xml                          mod manifest
+├── metadata.xml                          mod manifest, carries the Workshop id
 ├── resources/gfx/
-│   ├── secretsreveal_markers.anm2        3-frame marker animation
-│   └── secretsreveal_markers.png         96x32 sheet (3 x 32x32 markers)
-└── tools/make_markers.ps1                regenerates the PNG
+│   ├── secretsreveal_markers.anm2        4-frame marker animation
+│   └── secretsreveal_markers.png         128x32 sheet (4 x 32x32 markers)
+├── tools/
+│   ├── make_markers.ps1                  regenerates the marker sheet
+│   └── make_preview.ps1                  regenerates the Workshop thumbnail
+└── workshop/                             Workshop assets, NOT shipped in the mod
+    ├── preview.png                       640x640 thumbnail
+    └── screenshot-*.png                  gallery images
 ```
 
 To change the marker art, edit `tools/make_markers.ps1` and run:
 
 ```
 powershell -ExecutionPolicy Bypass -File tools\make_markers.ps1
+```
+
+`workshop/` is deliberately excluded when syncing into the game's mods folder,
+so those assets never get bundled into a Workshop upload:
+
+```
+robocopy . "<mods>\secrets-reveal_3780562693" /MIR /XD .git workshop
 ```

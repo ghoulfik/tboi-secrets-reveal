@@ -4,7 +4,8 @@
   Reveals the things the game deliberately hides:
     * Secret Room / Super Secret Room / Ultra Secret Room on the map
     * Rooms that contain a Crawlspace (revealed on the map)
-    * In-room markers over Crawlspaces, Tinted Rocks and Super Tinted Rocks
+    * In-room markers over Crawlspaces, Tinted Rocks, Super Tinted Rocks and
+      X-marked skulls
 
   Config is persisted through mod data and exposed through Mod Config Menu
   when that mod is installed.
@@ -25,20 +26,21 @@ local DISPLAY_REVEALED = 5
 local GRID_TINTED = GridEntityType.GRID_ROCKT     or 4   -- Tinted Rock
 local GRID_SUPER  = GridEntityType.GRID_ROCK_SS   or 22  -- Super Tinted Rock
 local GRID_CRAWL  = GridEntityType.GRID_STAIRS    or 18  -- Crawlspace
--- The rock/skull carrying an X mark. The X is the game's own hint that this
--- one is worth breaking; the contents are rolled at destruction time, so this
--- marks a candidate and promises nothing about what comes out.
--- Confirmed in game: this type matches the X-marked skulls and nothing else.
-local GRID_RUBBLE = GridEntityType.GRID_ROCK_ALT2 or 26
+-- Observed in game: this type matches the X-marked skull that yields a reward
+-- when broken, and nothing else. It is NOT the Downpour crawlspace rock this
+-- was originally, and wrongly, written for. Marking it is still worthwhile --
+-- an X-marked skull is exactly the kind of thing this mod exists to point at --
+-- but do not describe it as a crawlspace hint.
+local GRID_MARKED = GridEntityType.GRID_ROCK_ALT2 or 26
 
 -- Frame indices inside gfx/secretsreveal_markers.anm2
 local MARKER_TINTED = 0
 local MARKER_SUPER  = 1
 local MARKER_CRAWL  = 2
-local MARKER_RUBBLE = 3
+local MARKER_MARKED = 3
 
--- Candidate markers are drawn fainter: rubble rocks are common in Downpour and
--- a room full of full-brightness reticles is unreadable.
+-- Secondary markers are drawn fainter so they never compete with the ones
+-- pointing at a confirmed crawlspace or tinted rock.
 local CANDIDATE_ALPHA = 0.55
 
 -- Entity id used for a crawlspace inside a room layout (STB/XML "spawn" id).
@@ -68,7 +70,8 @@ local DEFAULTS = {
   markCrawl    = true,   -- in-room marker over crawlspaces
   markTinted   = true,   -- in-room marker over tinted rocks
   markSuper    = true,   -- in-room marker over super tinted rocks
-  markRubble   = true,   -- faint marker over rocks that may hide a crawlspace
+  markRubble   = true,   -- faint marker over X-marked skulls (key kept for
+                         -- compatibility with configs saved before the rename)
 
   pulse        = true,   -- markers fade in and out
   scale        = 1.0,    -- marker size multiplier
@@ -304,10 +307,10 @@ local function rescanRoom()
         if cfg.markSuper and isIntactRock(grid) then
           tracked[#tracked + 1] = { pos = grid.Position, frame = MARKER_SUPER }
         end
-      elseif gtype == GRID_RUBBLE then
+      elseif gtype == GRID_MARKED then
         if cfg.markRubble and isIntactRock(grid) then
           tracked[#tracked + 1] = {
-            pos = grid.Position, frame = MARKER_RUBBLE, faint = true,
+            pos = grid.Position, frame = MARKER_MARKED, faint = true,
           }
         end
       end
@@ -318,12 +321,12 @@ end
 local function describeRoomContents()
   local counts = {
     [MARKER_TINTED] = 0, [MARKER_SUPER] = 0,
-    [MARKER_CRAWL]  = 0, [MARKER_RUBBLE] = 0,
+    [MARKER_CRAWL]  = 0, [MARKER_MARKED] = 0,
   }
   for _, m in ipairs(tracked) do counts[m.frame] = counts[m.frame] + 1 end
 
-  -- Rubble rocks are deliberately left out: most Downpour rooms have several,
-  -- so listing them would put a notice on screen almost continuously.
+  -- X-marked skulls are deliberately left out. The notice is for things worth
+  -- changing your route over; the skull already advertises itself with the X.
   local parts = {}
   if counts[MARKER_CRAWL]  > 0 then parts[#parts + 1] = "Crawlspace"        end
   if counts[MARKER_SUPER]  > 0 then parts[#parts + 1] = "Super Tinted Rock" end
@@ -546,7 +549,7 @@ local function setupModConfigMenu()
   addToggle("Markers", "markCrawl",   "Crawlspaces",         { "Marker over crawlspaces in the room" })
   addToggle("Markers", "markTinted",  "Tinted Rocks",        { "Marker over tinted rocks in the room" })
   addToggle("Markers", "markSuper",   "Super Tinted Rocks",  { "Marker over super tinted rocks in the room" })
-  addToggle("Markers", "markRubble",  "X-marked rocks",      { "Faint marker over rocks and skulls", "carrying an X, which may hide a crawlspace" })
+  addToggle("Markers", "markRubble",  "X-marked skulls",     { "Faint marker over skulls carrying an X,", "which drop a reward when broken" })
   addToggle("Markers", "pulse",       "Pulsing markers",     { "Fade markers in and out" })
   addToggle("Markers", "notify",      "On-screen notices",   { "Short text when a floor or room holds a secret" })
 

@@ -21,11 +21,11 @@ A pulsing reticle is drawn over:
 [*][b]Cyan diamond[/b] - Tinted Rock
 [*][b]Gold star[/b] - Super Tinted Rock
 [*][b]Violet arrow[/b] - Crawlspace
-[*][b]Green hollow arrow[/b] - rock or skull with an X mark, which [i]may[/i] hide a crawlspace
+[*][b]Green hollow arrow[/b] - skull carrying an X mark, which drops a reward when broken
 [/list]
-Markers vanish the moment a rock breaks, and crawlspaces uncovered mid-fight (Downpour rubble, bombed floors) are picked up automatically.
+Markers vanish the moment a rock breaks, and crawlspaces uncovered mid-room (broken rocks, bombed floors) are picked up automatically.
 
-The green marker is a candidate, not a promise. The game rolls for the contents when the rock is destroyed rather than when the floor is generated, so nothing can be read in advance - it only tells you which rocks are worth breaking. It is drawn faint on purpose, and can be switched off on its own.
+The green marker is drawn faint on purpose so it never competes with the markers pointing at a crawlspace or a tinted rock, and it can be switched off on its own. It does not predict crawlspaces: a crawlspace produced by breaking a rock is rolled at the moment the rock breaks, so nothing can flag it in advance. Those are picked up by the in-room rescan once they exist.
 
 [h1]Controls[/h1]
 [list]
@@ -38,7 +38,7 @@ Both keys are rebindable through Mod Config Menu, which also exposes per-room-ty
 [list]
 [*]Lua only, no content overrides. It does [b]not[/b] disable achievements.
 [*]Turning the mod off does not un-reveal rooms already on the map - the game has no API for hiding a room again. It stops revealing new ones.
-[*]Crawlspaces created at random from Downpour/Dross rubble rocks cannot be known in advance; those get the in-room marker once they appear.
+[*]Crawlspaces that a breaking rock produces cannot be known in advance; those get the in-room marker once they appear.
 [/list]
 
 [hr][/hr]
