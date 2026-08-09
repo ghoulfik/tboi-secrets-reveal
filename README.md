@@ -2,6 +2,9 @@
 
 A Binding of Isaac: Repentance mod that reveals what the floor is hiding.
 
+**[Subscribe on the Steam Workshop](https://steamcommunity.com/sharedfiles/filedetails/?id=3780562693)**
+— or install manually, see below.
+
 ![Markers over tinted rocks, super tinted rocks and crawlspaces](workshop/screenshot-2-on.png)
 
 *Same room [without the mod](workshop/screenshot-1-off.png). Note the `?` icons

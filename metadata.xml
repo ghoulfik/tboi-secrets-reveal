@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <metadata>
-	<name>Secrets Reveal</name>
-	<directory>secrets-reveal</directory>
-	<description>Reveals what the floor is hiding, without touching anything else.
+    <name>Secrets Reveal</name>
+    <directory>secrets-reveal</directory>
+    <id>3780562693</id>
+    <description>Reveals what the floor is hiding, without touching anything else.
 
 [h1]On the map[/h1]
 As soon as you arrive on a floor, these are drawn on the minimap with their icons:
@@ -42,8 +43,8 @@ Both keys are rebindable through Mod Config Menu, which also exposes per-room-ty
 
 [hr][/hr]
 Source, issues and changelog: https://github.com/ghoulfik/tboi-secrets-reveal</description>
-	<version>1.1</version>
-	<visibility>Public</visibility>
-	<tag id="Lua"/>
-	<tag id="Tweaks"/>
+    <version>1.2</version>
+    <visibility>Public</visibility>
+    <tag id="Lua"/>
+    <tag id="Tweaks"/>
 </metadata>
