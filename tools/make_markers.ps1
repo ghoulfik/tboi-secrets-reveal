@@ -1,8 +1,11 @@
 # Regenerates resources/gfx/secretsreveal_markers.png
 #
-# 128x32 sheet, four 32x32 markers side by side:
+# 160x32 sheet, five 32x32 markers side by side:
 #   0 = Tinted Rock (cyan)        1 = Super Tinted Rock (gold)
-#   2 = Crawlspace (violet)       3 = Rubble Rock, may hide one (green, hollow)
+#   2 = Crawlspace (violet, solid arrow)
+#   3 = X-marked skull (green, hollow arrow)
+#   4 = Rock hiding a crawlspace (violet, hollow arrow - same colour as 2 to
+#       say "crawlspace", hollow to say "not uncovered yet")
 #
 # Run from anywhere:  powershell -ExecutionPolicy Bypass -File tools\make_markers.ps1
 
@@ -11,7 +14,7 @@ Add-Type -AssemblyName System.Drawing
 $root = Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path)
 $out  = Join-Path $root 'resources\gfx\secretsreveal_markers.png'
 
-$bmp = New-Object System.Drawing.Bitmap 128, 32, ([System.Drawing.Imaging.PixelFormat]::Format32bppArgb)
+$bmp = New-Object System.Drawing.Bitmap 160, 32, ([System.Drawing.Imaging.PixelFormat]::Format32bppArgb)
 $g   = [System.Drawing.Graphics]::FromImage($bmp)
 $g.SmoothingMode     = [System.Drawing.Drawing2D.SmoothingMode]::None
 $g.PixelOffsetMode   = [System.Drawing.Drawing2D.PixelOffsetMode]::Half
@@ -26,7 +29,8 @@ $colors = @(
     [System.Drawing.Color]::FromArgb(255,  90, 220, 255),  # tinted rock
     [System.Drawing.Color]::FromArgb(255, 255, 205,  60),  # super tinted rock
     [System.Drawing.Color]::FromArgb(255, 200, 130, 255),  # crawlspace
-    [System.Drawing.Color]::FromArgb(255, 120, 230, 140)   # rubble rock (candidate)
+    [System.Drawing.Color]::FromArgb(255, 120, 230, 140),  # X-marked skull
+    [System.Drawing.Color]::FromArgb(255, 200, 130, 255)   # rock hiding a crawlspace
 )
 
 function Draw-Brackets {
@@ -58,7 +62,7 @@ function Draw-Polygon {
     $g.FillPolygon($brush, [System.Drawing.Point[]]$pts)
 }
 
-for ($i = 0; $i -lt 4; $i++) {
+for ($i = 0; $i -lt 5; $i++) {
     $ox = $i * 32
     $accent = New-Object System.Drawing.SolidBrush $colors[$i]
 
@@ -82,8 +86,8 @@ for ($i = 0; $i -lt 4; $i++) {
             Draw-Polygon $g $shadow $ox @(@(9,10),@(23,10),@(16,23))
             Draw-Polygon $g $accent $ox @(@(11,12),@(21,12),@(16,20))
         }
-        3 {
-            # hollow version of the crawlspace arrow: "might be one under here"
+        { $_ -ge 3 } {
+            # hollow version of the crawlspace arrow: "something is under here"
             $tri = @(
                 (New-Object System.Drawing.Point (($ox + 10)), 11),
                 (New-Object System.Drawing.Point (($ox + 22)), 11),

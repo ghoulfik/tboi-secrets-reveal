@@ -22,10 +22,11 @@ A pulsing reticle is drawn over:
 [*][b]Gold star[/b] - Super Tinted Rock
 [*][b]Violet arrow[/b] - Crawlspace
 [*][b]Green hollow arrow[/b] - skull carrying an X mark, which drops a reward when broken
+[*][b]Violet hollow arrow[/b] - the rock this room's crawlspace is buried under
 [/list]
 Markers vanish the moment a rock breaks, and crawlspaces uncovered mid-room (broken rocks, bombed floors) are picked up automatically.
 
-The green marker is drawn faint on purpose so it never competes with the markers pointing at a crawlspace or a tinted rock, and it can be switched off on its own. It does not predict crawlspaces: a crawlspace produced by breaking a rock is rolled at the moment the rock breaks, so nothing can flag it in advance. Those are picked up by the in-room rescan once they exist.
+The hollow violet marker points at the exact rock a crawlspace is buried under, before you break anything. This is not guesswork: the engine picks that grid index when the room loads and exposes it directly, so the mod simply asks. If the chosen spot holds no breakable rock the crawlspace is unreachable and nothing is drawn.
 
 [h1]Controls[/h1]
 [list]

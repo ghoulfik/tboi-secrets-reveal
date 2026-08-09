@@ -33,11 +33,23 @@ local GRID_CRAWL  = GridEntityType.GRID_STAIRS    or 18  -- Crawlspace
 -- but do not describe it as a crawlspace hint.
 local GRID_MARKED = GridEntityType.GRID_ROCK_ALT2 or 26
 
+-- Every rock type a crawlspace can be buried under. Built from enum names so a
+-- member missing on some build is skipped instead of turning into a bad guess.
+local ROCK_TYPES = {}
+for _, name in ipairs({
+  "GRID_ROCK", "GRID_ROCKB", "GRID_ROCKT", "GRID_ROCK_BOMB", "GRID_ROCK_ALT",
+  "GRID_ROCK_SS", "GRID_ROCK_SPIKED", "GRID_ROCK_ALT2", "GRID_ROCK_GOLD",
+}) do
+  local value = GridEntityType[name]
+  if value then ROCK_TYPES[value] = true end
+end
+
 -- Frame indices inside gfx/secretsreveal_markers.anm2
-local MARKER_TINTED = 0
-local MARKER_SUPER  = 1
-local MARKER_CRAWL  = 2
-local MARKER_MARKED = 3
+local MARKER_TINTED    = 0
+local MARKER_SUPER     = 1
+local MARKER_CRAWL     = 2
+local MARKER_MARKED    = 3
+local MARKER_CRAWLROCK = 4
 
 -- Secondary markers are drawn fainter so they never compete with the ones
 -- pointing at a confirmed crawlspace or tinted rock.
@@ -72,6 +84,7 @@ local DEFAULTS = {
   markSuper    = true,   -- in-room marker over super tinted rocks
   markRubble   = true,   -- faint marker over X-marked skulls (key kept for
                          -- compatibility with configs saved before the rename)
+  markCrawlRock = true,  -- marker over the rock this room hides a crawlspace in
 
   pulse        = true,   -- markers fade in and out
   scale        = 1.0,    -- marker size multiplier
@@ -303,12 +316,25 @@ local function rescanRoom()
   roomMirrored = isMirrorWorld(room)
   if roomMirrored then mirrorAxisX = mirrorAxisFor(room) end
 
+  -- The engine already knows which grid index hides this room's crawlspace --
+  -- "dungeon" is its internal name for one -- so ask rather than reproduce the
+  -- seed maths. Returns an index outside the grid when the room has none.
+  local crawlRockIdx = -1
+  if cfg.markCrawlRock then
+    local ok, idx = pcall(function() return room:GetDungeonRockIdx() end)
+    if ok and type(idx) == "number" then crawlRockIdx = idx end
+  end
+
   for i = 0, size - 1 do
     local grid = room:GetGridEntity(i)
     if grid then
       local gtype = grid:GetType()
 
-      if gtype == GRID_CRAWL then
+      -- Checked before the type branches so it wins over the plain tinted or
+      -- X-marked treatment when the crawlspace happens to be under one of those.
+      if i == crawlRockIdx and ROCK_TYPES[gtype] and isIntactRock(grid) then
+        tracked[#tracked + 1] = { pos = grid.Position, frame = MARKER_CRAWLROCK }
+      elseif gtype == GRID_CRAWL then
         if cfg.markCrawl then
           tracked[#tracked + 1] = { pos = grid.Position, frame = MARKER_CRAWL }
         end
@@ -333,15 +359,16 @@ end
 
 local function describeRoomContents()
   local counts = {
-    [MARKER_TINTED] = 0, [MARKER_SUPER] = 0,
-    [MARKER_CRAWL]  = 0, [MARKER_MARKED] = 0,
+    [MARKER_TINTED] = 0, [MARKER_SUPER]  = 0, [MARKER_CRAWL] = 0,
+    [MARKER_MARKED] = 0, [MARKER_CRAWLROCK] = 0,
   }
   for _, m in ipairs(tracked) do counts[m.frame] = counts[m.frame] + 1 end
 
   -- X-marked skulls are deliberately left out. The notice is for things worth
   -- changing your route over; the skull already advertises itself with the X.
   local parts = {}
-  if counts[MARKER_CRAWL]  > 0 then parts[#parts + 1] = "Crawlspace"        end
+  if counts[MARKER_CRAWL]     > 0 then parts[#parts + 1] = "Crawlspace"           end
+  if counts[MARKER_CRAWLROCK] > 0 then parts[#parts + 1] = "Crawlspace under rock" end
   if counts[MARKER_SUPER]  > 0 then parts[#parts + 1] = "Super Tinted Rock" end
   if counts[MARKER_TINTED] > 0 then parts[#parts + 1] = "Tinted Rock"       end
 
@@ -563,6 +590,7 @@ local function setupModConfigMenu()
   addToggle("Markers", "markTinted",  "Tinted Rocks",        { "Marker over tinted rocks in the room" })
   addToggle("Markers", "markSuper",   "Super Tinted Rocks",  { "Marker over super tinted rocks in the room" })
   addToggle("Markers", "markRubble",  "X-marked skulls",     { "Faint marker over skulls carrying an X,", "which drop a reward when broken" })
+  addToggle("Markers", "markCrawlRock", "Crawlspace rocks",  { "Marks the exact rock hiding this room's", "crawlspace, straight from the engine" })
   addToggle("Markers", "pulse",       "Pulsing markers",     { "Fade markers in and out" })
   addToggle("Markers", "notify",      "On-screen notices",   { "Short text when a floor or room holds a secret" })
 

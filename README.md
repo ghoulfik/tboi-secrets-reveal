@@ -29,15 +29,21 @@ that appear on the minimap: those are the secret rooms being revealed.*
 | Gold star | Super Tinted Rock |
 | Violet arrow (solid) | Crawlspace |
 | Green arrow (hollow, faint) | Skull carrying an X mark, which drops a reward when broken |
+| Violet arrow (hollow) | The rock this room's crawlspace is buried under |
 
 The green marker is drawn at 55% alpha and left out of the room notices so it
 never competes with the markers that point at a crawlspace or a tinted rock.
 
-**It does not predict crawlspaces.** An earlier version of this file claimed it
-marked Downpour/Dross rocks that might hide one; that was wrong. The grid type
-it matches is the X-marked skull and nothing else. Crawlspaces that a rock
-produces are rolled at the moment the rock breaks, so no mod can flag them in
-advance — the mod picks them up from the in-room rescan once they exist.
+The **hollow violet** marker is the interesting one: it points at the exact
+rock a crawlspace is hidden under, before you break anything. Same colour as
+the solid crawlspace marker to say *crawlspace*, hollow to say *not uncovered
+yet*.
+
+That is not guesswork or seed maths. The engine picks the grid index when the
+room loads and exposes it as `Room:GetDungeonRockIdx()` — "dungeon" being its
+internal name for a crawlspace. The mod just asks. If the chosen index holds no
+breakable rock, the crawlspace is unreachable in that room and nothing is
+drawn, which matches the engine's own behaviour.
 
 Rock markers disappear the moment the rock is broken. Crawlspaces that get
 uncovered mid-room (broken rocks, bombed floors) are picked up
