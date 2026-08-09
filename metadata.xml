@@ -21,11 +21,11 @@ A pulsing reticle is drawn over:
 [*][b]Cyan diamond[/b] - Tinted Rock
 [*][b]Gold star[/b] - Super Tinted Rock
 [*][b]Violet arrow[/b] - Crawlspace
-[*][b]Green hollow arrow[/b] - Downpour/Dross rubble rock that [i]may[/i] hide a crawlspace
+[*][b]Green hollow arrow[/b] - rock or skull with an X mark, which [i]may[/i] hide a crawlspace
 [/list]
 Markers vanish the moment a rock breaks, and crawlspaces uncovered mid-fight (Downpour rubble, bombed floors) are picked up automatically.
 
-The green marker is a candidate, not a promise. The game rolls for a crawlspace when the rock is destroyed rather than when the floor is generated, so nothing can be read in advance - it only tells you which rocks are worth breaking. It is drawn faint on purpose, and can be switched off on its own.
+The green marker is a candidate, not a promise. The game rolls for the contents when the rock is destroyed rather than when the floor is generated, so nothing can be read in advance - it only tells you which rocks are worth breaking. It is drawn faint on purpose, and can be switched off on its own.
 
 [h1]Controls[/h1]
 [list]

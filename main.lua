@@ -25,9 +25,10 @@ local DISPLAY_REVEALED = 5
 local GRID_TINTED = GridEntityType.GRID_ROCKT     or 4   -- Tinted Rock
 local GRID_SUPER  = GridEntityType.GRID_ROCK_SS   or 22  -- Super Tinted Rock
 local GRID_CRAWL  = GridEntityType.GRID_STAIRS    or 18  -- Crawlspace
--- Downpour / Dross rubble rock. Breaking one can produce a crawlspace, but the
--- game rolls for that at destruction time, so this marks a candidate and makes
--- no promise about what is actually inside.
+-- The rock/skull carrying an X mark. The X is the game's own hint that this
+-- one is worth breaking; the contents are rolled at destruction time, so this
+-- marks a candidate and promises nothing about what comes out.
+-- Confirmed in game: this type matches the X-marked skulls and nothing else.
 local GRID_RUBBLE = GridEntityType.GRID_ROCK_ALT2 or 26
 
 -- Frame indices inside gfx/secretsreveal_markers.anm2
@@ -147,16 +148,35 @@ local function drawText(text, x, y, alpha, scale)
   font:DrawStringScaled(text, x, y, scale, scale, KColor(1, 1, 1, alpha), 0, false)
 end
 
+-- Set once per room scan rather than per marker: the dimension cannot change
+-- without a room change, and probing it is a guarded call.
+local roomMirrored = false
+
+local function isMirrorWorld(room)
+  local ok, mirrored = pcall(function() return room:IsMirrorWorld() end)
+  return ok and mirrored == true
+end
+
 -- Must be WorldToScreen, not WorldToRenderPosition. The latter is relative to
 -- the room's render origin and carries no camera scroll, so markers freeze on
 -- screen the moment a room is large enough for the camera to follow the player.
 -- Rooms that never scroll hide the difference entirely.
 local function worldToScreen(pos)
+  local room = Game():GetRoom()
+
+  -- Downpour II's mirror dimension draws the room flipped horizontally while
+  -- grid entities keep their unmirrored world coordinates, so reflect X about
+  -- the room centre or every marker lands on the wrong side of the room.
+  if roomMirrored then
+    local center = room:GetCenterPos()
+    pos = Vector(center.X * 2 - pos.X, pos.Y)
+  end
+
   if Isaac.WorldToScreen then
     return Isaac.WorldToScreen(pos)
   end
   -- Fallback: undo the scroll by hand.
-  return Isaac.WorldToRenderPosition(pos) - Game():GetRoom():GetRenderScrollOffset()
+  return Isaac.WorldToRenderPosition(pos) - room:GetRenderScrollOffset()
 end
 
 ----------------------------------------------------------------------
@@ -264,6 +284,8 @@ local function rescanRoom()
 
   local room = Game():GetRoom()
   local size = room:GetGridSize()
+
+  roomMirrored = isMirrorWorld(room)
 
   for i = 0, size - 1 do
     local grid = room:GetGridEntity(i)
@@ -524,7 +546,7 @@ local function setupModConfigMenu()
   addToggle("Markers", "markCrawl",   "Crawlspaces",         { "Marker over crawlspaces in the room" })
   addToggle("Markers", "markTinted",  "Tinted Rocks",        { "Marker over tinted rocks in the room" })
   addToggle("Markers", "markSuper",   "Super Tinted Rocks",  { "Marker over super tinted rocks in the room" })
-  addToggle("Markers", "markRubble",  "Crawlspace candidates", { "Faint marker over Downpour/Dross rubble", "rocks that may hide a crawlspace" })
+  addToggle("Markers", "markRubble",  "X-marked rocks",      { "Faint marker over rocks and skulls", "carrying an X, which may hide a crawlspace" })
   addToggle("Markers", "pulse",       "Pulsing markers",     { "Fade markers in and out" })
   addToggle("Markers", "notify",      "On-screen notices",   { "Short text when a floor or room holds a secret" })
 
