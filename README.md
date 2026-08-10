@@ -5,10 +5,15 @@ A Binding of Isaac: Repentance mod that reveals what the floor is hiding.
 **[Subscribe on the Steam Workshop](https://steamcommunity.com/sharedfiles/filedetails/?id=3780562693)**
 — or install manually, see below.
 
-![Markers over tinted rocks, super tinted rocks and crawlspaces](workshop/screenshot-2-on.png)
+![The mod marking the rock a crawlspace is buried under, then the crawlspace it uncovers](workshop/screenshot-1-crawlspace-under-rock.jpg)
 
-*Same room [without the mod](workshop/screenshot-1-off.png). Note the `?` icons
-that appear on the minimap: those are the secret rooms being revealed.*
+*Top: the hollow violet marker naming the rock before anything is broken.
+Bottom: the crawlspace that was under it.*
+
+![Markers over tinted rocks, super tinted rocks and crawlspaces](workshop/screenshot-2-markers.jpg)
+
+*Same room without the mod and with it. The `?` icons appearing on the minimap
+are the secret rooms being revealed.*
 
 ## What it does
 
@@ -133,7 +138,7 @@ Secrets_reveal/
 │   └── make_preview.ps1                  regenerates the Workshop thumbnail
 └── workshop/                             Workshop assets, NOT shipped in the mod
     ├── preview.png                       640x640 thumbnail
-    └── screenshot-*.png                  gallery images
+    └── screenshot-*.jpg                  gallery images
 ```
 
 To change the marker art, edit `tools/make_markers.ps1` and run:

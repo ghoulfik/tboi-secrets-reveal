@@ -1,7 +1,8 @@
 # Regenerates workshop/preview.png - the Steam Workshop thumbnail.
 #
 # 640x640, well under Steam's 1 MB limit. Scales the marker sheet up with
-# nearest-neighbour so the pixel art stays crisp.
+# nearest-neighbour so the pixel art stays crisp. Tile count is read from the
+# sheet width, so adding a marker needs no edit here.
 #
 # Run:  powershell -ExecutionPolicy Bypass -File tools\make_preview.ps1
 
@@ -41,14 +42,15 @@ $src = [System.Drawing.Image]::FromFile($markers)
 $g.InterpolationMode = [System.Drawing.Drawing2D.InterpolationMode]::NearestNeighbor
 $g.PixelOffsetMode   = [System.Drawing.Drawing2D.PixelOffsetMode]::Half
 
-$scale = 4
-$tile  = 32 * $scale          # 128
-$gap   = 40
-$total = (3 * $tile) + (2 * $gap)
+$count = [int]($src.Width / 32)
+$scale = 3
+$tile  = 32 * $scale          # 96
+$gap   = 20
+$total = ($count * $tile) + (($count - 1) * $gap)
 $startX = [int](($S - $total) / 2)
-$y      = 232
+$y      = 250
 
-for ($i = 0; $i -lt 3; $i++) {
+for ($i = 0; $i -lt $count; $i++) {
     $dst = New-Object System.Drawing.Rectangle (($startX + $i * ($tile + $gap))), $y, $tile, $tile
     $srcRect = New-Object System.Drawing.Rectangle ($i * 32), 0, 32, 32
     $g.DrawImage($src, $dst, $srcRect, [System.Drawing.GraphicsUnit]::Pixel)
@@ -71,8 +73,21 @@ $g.DrawString('SECRETS', $titleFont, $white, (New-Object System.Drawing.Rectangl
 $g.DrawString('REVEAL',  $titleFont, $shade, (New-Object System.Drawing.RectangleF 3, 143, $S, 90), $fmt)
 $g.DrawString('REVEAL',  $titleFont, $white, (New-Object System.Drawing.RectangleF 0, 140, $S, 90), $fmt)
 
-$g.DrawString('Secret rooms  -  Crawlspaces  -  Tinted rocks', $subFont, $dim,
-    (New-Object System.Drawing.RectangleF 0, 420, $S, 40), $fmt)
+# Shrink the subtitle until it fits the width, so editing the wording later
+# cannot silently clip it off the edge of the card.
+$subtitle = 'Secret rooms  -  Crawlspaces  -  Hidden rocks'
+$maxWidth = $S - 60
+for ($pt = 23; $pt -ge 12; $pt--) {
+    $probe = New-Object System.Drawing.Font 'Segoe UI', $pt, ([System.Drawing.FontStyle]::Regular)
+    $w = $g.MeasureString($subtitle, $probe).Width
+    $probe.Dispose()
+    if ($w -le $maxWidth) { break }
+}
+$subFont.Dispose()
+$subFont = New-Object System.Drawing.Font 'Segoe UI', $pt, ([System.Drawing.FontStyle]::Regular)
+
+$g.DrawString($subtitle, $subFont, $dim,
+    (New-Object System.Drawing.RectangleF 0, 424, $S, 40), $fmt)
 
 # Accent rule under the subtitle
 $rule = New-Object System.Drawing.SolidBrush ([System.Drawing.Color]::FromArgb(255, 90, 220, 255))
