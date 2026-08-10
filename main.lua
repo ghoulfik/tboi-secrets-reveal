@@ -33,11 +33,18 @@ local GRID_CRAWL  = GridEntityType.GRID_STAIRS    or 18  -- Crawlspace
 -- but do not describe it as a crawlspace hint.
 local GRID_MARKED = GridEntityType.GRID_ROCK_ALT2 or 26
 
--- Every rock type a crawlspace can be buried under. Built from enum names so a
--- member missing on some build is skipped instead of turning into a bad guess.
+-- Every rock type a crawlspace can actually be dug out of. Built from enum
+-- names so a member missing on some build is skipped instead of turning into a
+-- bad guess.
+--
+-- GRID_ROCKB is deliberately absent: it is the immovable block, not a rock.
+-- Bombable rocks have their own type (GRID_ROCK_BOMB), so nothing breakable is
+-- lost by excluding it. When the engine's chosen index lands on a block the
+-- crawlspace is genuinely unreachable, and marking it promised a crawlspace
+-- that was never there.
 local ROCK_TYPES = {}
 for _, name in ipairs({
-  "GRID_ROCK", "GRID_ROCKB", "GRID_ROCKT", "GRID_ROCK_BOMB", "GRID_ROCK_ALT",
+  "GRID_ROCK", "GRID_ROCKT", "GRID_ROCK_BOMB", "GRID_ROCK_ALT",
   "GRID_ROCK_SS", "GRID_ROCK_SPIKED", "GRID_ROCK_ALT2", "GRID_ROCK_GOLD",
 }) do
   local value = GridEntityType[name]
