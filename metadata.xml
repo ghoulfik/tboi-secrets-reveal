@@ -35,7 +35,7 @@ Markers vanish the moment a rock breaks, and crawlspaces uncovered mid-room (bro
 [*][b]F5[/b] - toggle the whole mod
 [*][b]F6[/b] - show/hide the bottom-left notices
 [/list]
-Both keys are rebindable through Mod Config Menu, which also exposes per-room-type and per-marker toggles, marker colours, marker size and text size. Mod Config Menu is optional - without it the defaults apply and both keys work.
+Both keys are rebindable through Mod Config Menu, which also exposes per-room-type and per-marker toggles, marker colours, opacity, size, text size, and a reset for the colours or for everything. Mod Config Menu is optional - without it the defaults apply and both keys work.
 
 [h1]Notes[/h1]
 [list]

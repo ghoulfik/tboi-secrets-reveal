@@ -98,7 +98,8 @@ conflict with anything else and does **not** disable achievements.
 * **F5** — toggle the whole mod on/off in game.
 * **F6** — show/hide the bottom-left notices. On by default.
 * Debug console: `secrets`, `secrets on`, `secrets off`,
-  `secrets logs`, `secrets logs on`, `secrets logs off`.
+  `secrets logs`, `secrets logs on`, `secrets logs off`,
+  `secrets reset`, `secrets reset colours`.
 
 Both keys save immediately, so the state carries across runs and restarts.
 Hiding the notices does not affect the map reveal or the in-room markers.
@@ -109,9 +110,11 @@ Install [Mod Config Menu](https://steamcommunity.com/sharedfiles/filedetails/?id
 to get a **Secrets Reveal** category with:
 
 * *Map* — per-room-type reveal toggles, crawlspace room reveal
-* *Markers* — per-marker toggles, pulsing on/off, marker size (50–200%),
-  notices on/off, notice text size (50–200%), both rebindable keys
-* *Colours* — a palette entry per marker
+* *Markers* — per-marker toggles, pulsing on/off, marker opacity (10–100%),
+  marker size (50–200%), notices on/off, notice text size (50–200%), both
+  rebindable keys
+* *Colours* — a palette entry per marker, plus a reset
+* *Reset* — put the colours, or every setting, back to default
 
 Without Mod Config Menu the defaults apply (everything on). Settings are saved
 per-mod, so they survive restarts either way.

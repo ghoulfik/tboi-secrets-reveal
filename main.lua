@@ -129,6 +129,7 @@ local DEFAULTS = {
   colorCrawlRock = PALETTE_VIOLET,
 
   pulse        = true,   -- markers fade in and out
+  opacity      = 1.0,    -- overall marker transparency
   scale        = 1.0,    -- marker size multiplier
   notify       = true,   -- short on-screen notices (bottom-left)
   noticeScale  = 0.8,    -- notice text size multiplier
@@ -157,6 +158,14 @@ local function loadConfig()
   for _, key in pairs(MARKER_COLOR_KEY) do
     local index = cfg[key]
     if type(index) ~= "number" or not PALETTE[index] then
+      cfg[key] = DEFAULTS[key]
+    end
+  end
+
+  -- Likewise the multipliers: a non-number would poison every Color() call,
+  -- and zero opacity would look identical to the mod being broken.
+  for key, lowest in pairs({ opacity = 0.05, scale = 0.1, noticeScale = 0.1 }) do
+    if type(cfg[key]) ~= "number" or cfg[key] < lowest then
       cfg[key] = DEFAULTS[key]
     end
   end
@@ -511,6 +520,16 @@ end
 -- Forward declaration; defined with the Mod Config Menu block below.
 local tryModConfigMenu
 
+local function resetColors()
+  for _, key in pairs(MARKER_COLOR_KEY) do cfg[key] = DEFAULTS[key] end
+  saveConfig()
+end
+
+local function resetAll()
+  for key, value in pairs(DEFAULTS) do cfg[key] = value end
+  saveConfig()
+end
+
 function mod:onRender()
   tryModConfigMenu()
 
@@ -555,9 +574,11 @@ function mod:onRender()
   if game:IsPaused() then return end
   if not ensureSprite() then return end
 
-  local alpha = 1.0
+  -- Opacity scales whatever the pulse produces, so the two settings compose
+  -- instead of one overriding the other.
+  local alpha = cfg.opacity
   if cfg.pulse then
-    alpha = 0.6 + 0.35 * math.sin(now * 0.12)
+    alpha = alpha * (0.6 + 0.35 * math.sin(now * 0.12))
   end
 
   markerSprite.Scale = Vector(cfg.scale, cfg.scale)
@@ -586,6 +607,15 @@ function mod:onCommand(cmd, params)
     elseif logArg == "off" then setNotices(false)
     else                        setNotices(not cfg.notify) end
     return "Secrets Reveal notices: " .. (cfg.notify and "ON" or "OFF")
+  end
+
+  if params == "reset colours" or params == "reset colors" then
+    resetColors()
+    return "Secrets Reveal: marker colours reset"
+  elseif params == "reset" then
+    resetAll()
+    rescanRoom()
+    return "Secrets Reveal: all settings reset"
   end
 
   if     params == "off" then setEnabled(false)
@@ -662,6 +692,17 @@ local function setupModConfigMenu()
 
   ModConfigMenu.AddSetting(CATEGORY, "Markers", {
     Type           = ModConfigMenu.OptionType.NUMBER,
+    CurrentSetting = function() return math.floor(cfg.opacity * 100) end,
+    Minimum        = 10,
+    Maximum        = 100,
+    ModifyBy       = 5,
+    Display        = function() return "Marker opacity: " .. math.floor(cfg.opacity * 100) .. "%" end,
+    OnChange       = function(value) cfg.opacity = value / 100; saveConfig() end,
+    Info           = { "How solid the markers are drawn.", "Scales the pulse rather than replacing it" },
+  })
+
+  ModConfigMenu.AddSetting(CATEGORY, "Markers", {
+    Type           = ModConfigMenu.OptionType.NUMBER,
     CurrentSetting = function() return math.floor(cfg.noticeScale * 100) end,
     Minimum        = 50,
     Maximum        = 200,
@@ -712,6 +753,27 @@ local function setupModConfigMenu()
 
   addKeybind("toggleKey", "Toggle mod key",     { "Turns the whole mod on and off in game" })
   addKeybind("noticeKey", "Toggle notices key", { "Shows/hides the bottom-left notices" })
+
+  -- Mod Config Menu has no button widget. A boolean whose CurrentSetting always
+  -- reports false acts as one: toggling it fires OnChange and the row snaps
+  -- straight back to "Off", so it reads as a press rather than a state.
+  local function addResetButton(subcategory, label, action, info)
+    ModConfigMenu.AddSetting(CATEGORY, subcategory, {
+      Type           = ModConfigMenu.OptionType.BOOLEAN,
+      CurrentSetting = function() return false end,
+      Display        = function() return label end,
+      OnChange       = function(value) if value then action() end end,
+      Info           = info,
+    })
+  end
+
+  addResetButton("Colours", ">> Reset colours to default <<", resetColors,
+    { "Puts all five marker colours back", "to how they shipped" })
+
+  addResetButton("Reset", ">> Reset colours to default <<", resetColors,
+    { "Marker colours only. Everything else", "is left alone" })
+  addResetButton("Reset", ">> Reset EVERYTHING to default <<", resetAll,
+    { "Every setting on every page, including", "colours and both keybinds" })
 end
 
 -- Mod Config Menu may load after this mod, so keep looking for it for a few
