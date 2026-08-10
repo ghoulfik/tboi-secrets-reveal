@@ -47,7 +47,7 @@ Both keys are rebindable through Mod Config Menu, which also exposes per-room-ty
 [hr][/hr]
 Source, issues and changelog: https://github.com/ghoulfik/tboi-secrets-reveal</description>
     <version>1.3</version>
-    <visibility>Private</visibility>
+    <visibility>Public</visibility>
     <tag id="Lua"/>
     <tag id="Tweaks"/>
 </metadata>
