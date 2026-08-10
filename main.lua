@@ -520,6 +520,19 @@ end
 -- Forward declaration; defined with the Mod Config Menu block below.
 local tryModConfigMenu
 
+-- Mod Config Menu draws its own full-screen UI without pausing the game, so
+-- Game():IsPaused() stays false and nothing else here would notice it is open.
+-- Tolerates IsVisible being either a field or a function.
+local function configMenuOpen()
+  if not ModConfigMenu then return false end
+  local visible = ModConfigMenu.IsVisible
+  if type(visible) == "function" then
+    local ok, result = pcall(visible)
+    return ok and result == true
+  end
+  return visible == true
+end
+
 local function resetColors()
   for _, key in pairs(MARKER_COLOR_KEY) do cfg[key] = DEFAULTS[key] end
   saveConfig()
@@ -532,6 +545,10 @@ end
 
 function mod:onRender()
   tryModConfigMenu()
+
+  -- Nothing this mod draws belongs on top of a menu, and while Mod Config Menu
+  -- is capturing input a rebind prompt would otherwise see F5/F6 as a toggle.
+  if configMenuOpen() then return end
 
   -- Keys are polled here so they also work while the game is paused.
   if keyCooldown > 0 then keyCooldown = keyCooldown - 1 end
@@ -546,6 +563,10 @@ function mod:onRender()
       setNotices(not cfg.notify)
     end
   end
+
+  -- Checked after the keys so F5/F6 still work from the pause screen, but
+  -- before anything is drawn so neither markers nor notices land on the menu.
+  if Game():IsPaused() then return end
 
   local now = Isaac.GetFrameCount()
 
@@ -569,9 +590,6 @@ function mod:onRender()
   end
 
   if not cfg.enabled or #tracked == 0 then return end
-
-  local game = Game()
-  if game:IsPaused() then return end
   if not ensureSprite() then return end
 
   -- Opacity scales whatever the pulse produces, so the two settings compose
