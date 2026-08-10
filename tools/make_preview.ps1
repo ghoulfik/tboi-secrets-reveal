@@ -50,10 +50,29 @@ $total = ($count * $tile) + (($count - 1) * $gap)
 $startX = [int](($S - $total) / 2)
 $y      = 250
 
+# The sheet ships white and is tinted at draw time in game, so the preview has
+# to apply the same default colours. Keep in step with DEFAULTS in main.lua.
+$tints = @(
+    @(0.35, 0.86, 1.00),   # tinted rock          - cyan
+    @(1.00, 0.80, 0.24),   # super tinted rock    - gold
+    @(0.78, 0.51, 1.00),   # open crawlspace      - violet
+    @(0.47, 0.90, 0.55),   # X-marked skull       - green
+    @(0.78, 0.51, 1.00)    # buried crawlspace    - violet
+)
+
 for ($i = 0; $i -lt $count; $i++) {
     $dst = New-Object System.Drawing.Rectangle (($startX + $i * ($tile + $gap))), $y, $tile, $tile
-    $srcRect = New-Object System.Drawing.Rectangle ($i * 32), 0, 32, 32
-    $g.DrawImage($src, $dst, $srcRect, [System.Drawing.GraphicsUnit]::Pixel)
+
+    $t = @(1.0, 1.0, 1.0)
+    if ($i -lt $tints.Count) { $t = $tints[$i] }
+
+    $cm = New-Object System.Drawing.Imaging.ColorMatrix
+    $cm.Matrix00 = $t[0]; $cm.Matrix11 = $t[1]; $cm.Matrix22 = $t[2]
+    $attr = New-Object System.Drawing.Imaging.ImageAttributes
+    $attr.SetColorMatrix($cm)
+
+    $g.DrawImage($src, $dst, ($i * 32), 0, 32, 32, [System.Drawing.GraphicsUnit]::Pixel, $attr)
+    $attr.Dispose()
 }
 $src.Dispose()
 

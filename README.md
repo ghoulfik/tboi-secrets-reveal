@@ -28,13 +28,17 @@ are the secret rooms being revealed.*
 
 **Inside the room** — a pulsing reticle is drawn over:
 
-| Marker | Meaning |
-| --- | --- |
-| Cyan diamond | Tinted Rock |
-| Gold star | Super Tinted Rock |
-| Violet arrow (solid) | Crawlspace |
-| Green arrow (hollow, faint) | Skull carrying an X mark, which drops a reward when broken |
-| Violet arrow (hollow) | The rock this room's crawlspace is buried under |
+| Marker | Default colour | Meaning |
+| --- | --- | --- |
+| Hollow down arrow | Violet | The rock this room's crawlspace is buried under |
+| Solid down arrow | Violet | A crawlspace, already open |
+| Diamond | Cyan | Tinted Rock |
+| Four-pointed star | Gold | Super Tinted Rock |
+| X (faint) | Green | Skull carrying an X mark, which drops a reward when broken |
+
+Every colour is configurable through Mod Config Menu, from a ten-entry palette.
+Each marker is a distinct *shape* as well, so setting two of them to the same
+colour still leaves them tellable apart.
 
 The green marker is drawn at 55% alpha and left out of the room notices so it
 never competes with the markers that point at a crawlspace or a tinted rock.
@@ -107,6 +111,7 @@ to get a **Secrets Reveal** category with:
 * *Map* — per-room-type reveal toggles, crawlspace room reveal
 * *Markers* — per-marker toggles, pulsing on/off, marker size (50–200%),
   notices on/off, notice text size (50–200%), both rebindable keys
+* *Colours* — a palette entry per marker
 
 Without Mod Config Menu the defaults apply (everything on). Settings are saved
 per-mod, so they survive restarts either way.
@@ -132,7 +137,7 @@ Secrets_reveal/
 ├── metadata.xml                          mod manifest, carries the Workshop id
 ├── resources/gfx/
 │   ├── secretsreveal_markers.anm2        5-frame marker animation
-│   └── secretsreveal_markers.png         160x32 sheet (5 x 32x32 markers)
+│   └── secretsreveal_markers.png         160x32 sheet, white; tinted at draw time
 ├── tools/
 │   ├── make_markers.ps1                  regenerates the marker sheet
 │   └── make_preview.ps1                  regenerates the Workshop thumbnail

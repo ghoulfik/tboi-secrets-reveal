@@ -18,12 +18,13 @@ Same idea as the Blue Map: it shows you [i]which wall[/i] to bomb, not the door 
 [h1]In the room[/h1]
 A pulsing reticle is drawn over:
 [list]
-[*][b]Violet hollow arrow[/b] - the rock this room's crawlspace is buried under
-[*][b]Violet solid arrow[/b] - a crawlspace, already open
-[*][b]Cyan diamond[/b] - Tinted Rock
-[*][b]Gold star[/b] - Super Tinted Rock
-[*][b]Green hollow arrow[/b] - skull carrying an X mark, which drops a reward when broken
+[*][b]Hollow arrow, violet[/b] - the rock this room's crawlspace is buried under
+[*][b]Solid arrow, violet[/b] - a crawlspace, already open
+[*][b]Diamond, cyan[/b] - Tinted Rock
+[*][b]Star, gold[/b] - Super Tinted Rock
+[*][b]X, green[/b] - skull carrying an X mark, which drops a reward when broken
 [/list]
+Every colour can be changed through Mod Config Menu. Each marker is a distinct shape too, so two set to the same colour are still tellable apart.
 
 The hollow violet marker is the one worth having. It names the exact rock a crawlspace is buried under before you break anything, then turns solid once the crawlspace is open. This is not guesswork: the engine picks that grid index when the room loads and exposes it directly, so the mod simply asks. If the chosen spot holds no breakable rock, the crawlspace is unreachable there and nothing is drawn.
 
@@ -34,7 +35,7 @@ Markers vanish the moment a rock breaks, and crawlspaces uncovered mid-room (bro
 [*][b]F5[/b] - toggle the whole mod
 [*][b]F6[/b] - show/hide the bottom-left notices
 [/list]
-Both keys are rebindable through Mod Config Menu, which also exposes per-room-type and per-marker toggles, marker size and text size. Mod Config Menu is optional - without it the defaults apply and both keys work.
+Both keys are rebindable through Mod Config Menu, which also exposes per-room-type and per-marker toggles, marker colours, marker size and text size. Mod Config Menu is optional - without it the defaults apply and both keys work.
 
 [h1]Notes[/h1]
 [list]
@@ -45,8 +46,8 @@ Both keys are rebindable through Mod Config Menu, which also exposes per-room-ty
 
 [hr][/hr]
 Source, issues and changelog: https://github.com/ghoulfik/tboi-secrets-reveal</description>
-    <version>1.2</version>
-    <visibility>Public</visibility>
+    <version>1.3</version>
+    <visibility>Private</visibility>
     <tag id="Lua"/>
     <tag id="Tweaks"/>
 </metadata>

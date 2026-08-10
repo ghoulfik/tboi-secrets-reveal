@@ -62,6 +62,34 @@ local MARKER_CRAWLROCK = 4
 -- pointing at a confirmed crawlspace or tinted rock.
 local CANDIDATE_ALPHA = 0.55
 
+-- The spritesheet is white, so a marker's colour is whatever tint it is drawn
+-- with. Keep this list append-only: saved configs store the index, so
+-- reordering it would silently repaint everyone's markers.
+local PALETTE = {
+  { name = "White",  r = 1.00, g = 1.00, b = 1.00 },
+  { name = "Cyan",   r = 0.35, g = 0.86, b = 1.00 },
+  { name = "Blue",   r = 0.42, g = 0.56, b = 1.00 },
+  { name = "Green",  r = 0.47, g = 0.90, b = 0.55 },
+  { name = "Lime",   r = 0.72, g = 1.00, b = 0.33 },
+  { name = "Gold",   r = 1.00, g = 0.80, b = 0.24 },
+  { name = "Orange", r = 1.00, g = 0.58, b = 0.20 },
+  { name = "Red",    r = 1.00, g = 0.36, b = 0.36 },
+  { name = "Pink",   r = 1.00, g = 0.50, b = 0.80 },
+  { name = "Violet", r = 0.78, g = 0.51, b = 1.00 },
+}
+
+local PALETTE_CYAN, PALETTE_GREEN   = 2, 4
+local PALETTE_GOLD, PALETTE_VIOLET  = 6, 10
+
+-- Which config entry supplies each frame's tint.
+local MARKER_COLOR_KEY = {
+  [MARKER_TINTED]    = "colorTinted",
+  [MARKER_SUPER]     = "colorSuper",
+  [MARKER_CRAWL]     = "colorCrawl",
+  [MARKER_MARKED]    = "colorMarked",
+  [MARKER_CRAWLROCK] = "colorCrawlRock",
+}
+
 -- Entity id used for a crawlspace inside a room layout (STB/XML "spawn" id).
 local SPAWN_ID_CRAWLSPACE = 9100
 
@@ -93,6 +121,13 @@ local DEFAULTS = {
                          -- compatibility with configs saved before the rename)
   markCrawlRock = true,  -- marker over the rock this room hides a crawlspace in
 
+  -- Marker colours, as indices into PALETTE
+  colorTinted    = PALETTE_CYAN,
+  colorSuper     = PALETTE_GOLD,
+  colorCrawl     = PALETTE_VIOLET,
+  colorMarked    = PALETTE_GREEN,
+  colorCrawlRock = PALETTE_VIOLET,
+
   pulse        = true,   -- markers fade in and out
   scale        = 1.0,    -- marker size multiplier
   notify       = true,   -- short on-screen notices (bottom-left)
@@ -115,6 +150,15 @@ local function loadConfig()
   if not ok or type(decoded) ~= "table" then return end
   for k in pairs(DEFAULTS) do
     if decoded[k] ~= nil then cfg[k] = decoded[k] end
+  end
+
+  -- A colour index from an older or hand-edited config must never index past
+  -- the palette: that would be a nil lookup on every rendered marker.
+  for _, key in pairs(MARKER_COLOR_KEY) do
+    local index = cfg[key]
+    if type(index) ~= "number" or not PALETTE[index] then
+      cfg[key] = DEFAULTS[key]
+    end
   end
 end
 
@@ -519,7 +563,11 @@ function mod:onRender()
   markerSprite.Scale = Vector(cfg.scale, cfg.scale)
 
   for _, m in ipairs(tracked) do
-    markerSprite.Color = Color(1, 1, 1, m.faint and alpha * CANDIDATE_ALPHA or alpha)
+    -- The sheet is white, so this tint is the marker's colour outright. The
+    -- black outline is unaffected: black multiplied by any tint stays black.
+    local tint = PALETTE[cfg[MARKER_COLOR_KEY[m.frame]]] or PALETTE[1]
+    markerSprite.Color = Color(tint.r, tint.g, tint.b,
+                               m.faint and alpha * CANDIDATE_ALPHA or alpha)
     markerSprite:SetFrame("Marker", m.frame)
     markerSprite:Render(worldToScreen(m.pos), Vector.Zero, Vector.Zero)
   end
@@ -622,6 +670,31 @@ local function setupModConfigMenu()
     OnChange       = function(value) cfg.noticeScale = value / 100; saveConfig() end,
     Info           = { "Size of the bottom-left notice text" },
   })
+
+  -- Mod Config Menu has no colour picker, so cycle a named palette instead.
+  -- Reads better than three raw RGB sliders per marker anyway.
+  local function addColor(key, label)
+    ModConfigMenu.AddSetting(CATEGORY, "Colours", {
+      Type           = ModConfigMenu.OptionType.NUMBER,
+      CurrentSetting = function() return cfg[key] end,
+      Minimum        = 1,
+      Maximum        = #PALETTE,
+      ModifyBy       = 1,
+      Display        = function()
+        return label .. ": " .. (PALETTE[cfg[key]] and PALETTE[cfg[key]].name or "?")
+      end,
+      OnChange       = function(value)
+        if PALETTE[value] then cfg[key] = value; saveConfig() end
+      end,
+      Info = { "Colour of the " .. label .. " marker" },
+    })
+  end
+
+  addColor("colorCrawlRock", "buried crawlspace")
+  addColor("colorCrawl",     "open crawlspace")
+  addColor("colorTinted",    "tinted rock")
+  addColor("colorSuper",     "super tinted rock")
+  addColor("colorMarked",    "X-marked skull")
 
   local function addKeybind(key, label, info)
     ModConfigMenu.AddSetting(CATEGORY, "Markers", {
