@@ -7,12 +7,12 @@ A Binding of Isaac: Repentance mod that reveals what the floor is hiding.
 
 ![The mod marking the rock a crawlspace is buried under, then the crawlspace it uncovers](workshop/screenshot-1-crawlspace-under-rock.jpg)
 
-*Top: the hollow violet marker naming the rock before anything is broken.
-Bottom: the crawlspace that was under it.*
+*Top: the hollow arrow naming the rock before anything is broken. Bottom: the
+same marker turned solid over the crawlspace that was under it.*
 
 ![Markers over tinted rocks, super tinted rocks and crawlspaces](workshop/screenshot-2-markers.jpg)
 
-*Same room without the mod and with it. The `?` icons appearing on the minimap
+*Left without the mod, right with it. The `?` icons appearing on the minimap
 are the secret rooms being revealed.*
 
 ## What it does
