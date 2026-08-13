@@ -320,6 +320,16 @@ local function revealRooms()
   local found = { secret = 0, supersecret = 0, ultrasecret = 0, crawl = 0 }
   local changed = false
 
+  -- Guaranteed Crawlspaces picks its room at runtime rather than shipping one
+  -- built with a crawlspace in it, so layoutContainsSpawn cannot find it. Ask
+  -- directly. Stays -1, matching no room, when that mod is not installed.
+  local guaranteedRoom = -1
+  if cfg.crawlRooms and GuaranteedCrawlspaces
+      and GuaranteedCrawlspaces.GetRoomListIndex then
+    local ok, listIndex = pcall(GuaranteedCrawlspaces.GetRoomListIndex)
+    if ok and type(listIndex) == "number" then guaranteedRoom = listIndex end
+  end
+
   for i = 0, rooms.Size - 1 do
     local desc = rooms:Get(i)
     if desc and desc.Data then
@@ -330,7 +340,8 @@ local function revealRooms()
         local key      = SECRET_ROOM_TYPES[desc.Data.Type]
         local isSecret = key ~= nil and cfg[key]
         local isCrawl  = cfg.crawlRooms
-                         and layoutContainsSpawn(desc.Data, SPAWN_ID_CRAWLSPACE)
+                         and (layoutContainsSpawn(desc.Data, SPAWN_ID_CRAWLSPACE)
+                              or desc.ListIndex == guaranteedRoom)
 
         if isSecret or isCrawl then
           -- GetRoomByIdx returns the descriptor for the *current* dimension, so
@@ -383,6 +394,19 @@ local function rescanRoom()
   if cfg.markCrawlRock then
     local ok, idx = pcall(function() return room:GetDungeonRockIdx() end)
     if ok and type(idx) == "number" then crawlRockIdx = idx end
+
+    -- Guaranteed Crawlspaces fixes the case this mod can only report: an index
+    -- landing on a block or a pit, where the crawlspace is unreachable. Usually
+    -- it plants a rock on the engine's own index and the answer above is
+    -- already right; when the index was unusable it moves the crawlspace, and
+    -- this is the only way to learn where. Nil-checked, so nothing changes when
+    -- that mod is not installed.
+    if GuaranteedCrawlspaces and GuaranteedCrawlspaces.GetRockIndex then
+      local moved, index = pcall(GuaranteedCrawlspaces.GetRockIndex)
+      if moved and type(index) == "number" and index >= 0 then
+        crawlRockIdx = index
+      end
+    end
   end
 
   for i = 0, size - 1 do
