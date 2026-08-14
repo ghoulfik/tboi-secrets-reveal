@@ -111,9 +111,9 @@ to get a **Secrets Reveal** category with:
 
 * *Map* — per-room-type reveal toggles, crawlspace room reveal
 * *Markers* — per-marker toggles, pulsing on/off, marker opacity (10–100%),
-  marker size (50–200%), notices on/off, notice text size (50–200%), both
-  rebindable keys
+  marker size (50–200%), notices on/off, notice text size (50–200%)
 * *Colours* — a palette entry per marker, plus a reset
+* *Keys* — rebind F5 and F6, or clear them entirely
 * *Reset* — put the colours, or every setting, back to default
 
 Without Mod Config Menu the defaults apply (everything on). Settings are saved

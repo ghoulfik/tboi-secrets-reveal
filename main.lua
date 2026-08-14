@@ -779,17 +779,31 @@ local function setupModConfigMenu()
   addColor("colorSuper",     "super tinted rock")
   addColor("colorMarked",    "X-marked skull")
 
+  local function keyName(code)
+    if not code or code < 0 then return "none" end
+    local name = InputHelper and InputHelper.KeyboardToString
+                 and InputHelper.KeyboardToString[code]
+    return name or ("key " .. tostring(code))
+  end
+
+  -- A keybind row needs Popup: that is the "press a key" prompt Mod Config Menu
+  -- opens when the row is activated. Without it the row still draws and still
+  -- shows its value, but activating it does nothing, so the binding looks
+  -- permanently fixed. Every other option type works without one.
   local function addKeybind(key, label, info)
-    ModConfigMenu.AddSetting(CATEGORY, "Markers", {
+    ModConfigMenu.AddSetting(CATEGORY, "Keys", {
       Type           = ModConfigMenu.OptionType.KEYBIND_KEYBOARD,
       CurrentSetting = function() return cfg[key] end,
-      Display        = function()
-        local name = InputHelper and InputHelper.KeyboardToString[cfg[key]]
-        return label .. ": " .. (name or tostring(cfg[key]))
-      end,
+      Display        = function() return label .. ": " .. keyName(cfg[key]) end,
       OnChange       = function(value) cfg[key] = value or -1; saveConfig() end,
-      Info           = info,
+      Popup          = function()
+        return "Currently: " .. keyName(cfg[key])
+            .. "\n\nPress a key to bind it."
+            .. "\nPress ESC to clear the binding."
+      end,
       PopupGfx       = ModConfigMenu.PopupGfx and ModConfigMenu.PopupGfx.WIDE_SMALL or nil,
+      PopupWidth     = 280,
+      Info           = info,
     })
   end
 
