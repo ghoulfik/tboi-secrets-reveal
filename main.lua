@@ -796,13 +796,20 @@ local function setupModConfigMenu()
       CurrentSetting = function() return cfg[key] end,
       Display        = function() return label .. ": " .. keyName(cfg[key]) end,
       OnChange       = function(value) cfg[key] = value or -1; saveConfig() end,
+      -- Mod Config Menu breaks popup lines on the literal token "$newline",
+      -- not on "\n", which it renders as nothing.
       Popup          = function()
         return "Currently: " .. keyName(cfg[key])
-            .. "\n\nPress a key to bind it."
-            .. "\nPress ESC to clear the binding."
+            .. "$newline$newline" .. "Press a key to bind it."
+            .. "$newline" .. "Keys the menu itself uses are refused:"
+            .. "$newline" .. "movement, select, back, and anything already"
+            .. "$newline" .. "bound to a game action. Try F7-F12."
       end,
       PopupGfx       = ModConfigMenu.PopupGfx and ModConfigMenu.PopupGfx.WIDE_SMALL or nil,
       PopupWidth     = 280,
+      -- Lets the menu's reset key restore the shipped binding. Without it,
+      -- reset on a keybind row does nothing at all.
+      Default        = DEFAULTS[key],
       Info           = info,
     })
   end
