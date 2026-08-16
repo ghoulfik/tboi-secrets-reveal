@@ -171,7 +171,20 @@ local function loadConfig()
   end
 end
 
+-- Runs at boot, before any save slot is active, so it may well find nothing.
 loadConfig()
+
+-- Callback order between MC_POST_GAME_STARTED and MC_POST_NEW_LEVEL is not
+-- guaranteed, and revealing a room reads cfg. Loading only in GAME_STARTED
+-- meant a run that fired NEW_LEVEL first revealed rooms from the boot-time
+-- defaults -- everything on -- whatever the player had actually turned off.
+local runConfigLoaded = false
+
+local function ensureConfigLoaded()
+  if runConfigLoaded then return end
+  loadConfig()
+  runConfigLoaded = true
+end
 
 ----------------------------------------------------------------------
 -- Rendering helpers
@@ -465,6 +478,7 @@ end
 ----------------------------------------------------------------------
 
 function mod:onNewLevel()
+  ensureConfigLoaded()
   if not cfg.enabled then return end
 
   local found = revealRooms()
@@ -488,6 +502,7 @@ function mod:onNewLevel()
 end
 
 function mod:onNewRoom()
+  ensureConfigLoaded()
   if not cfg.enabled then
     tracked = {}
     return
@@ -673,7 +688,9 @@ mod:AddCallback(ModCallbacks.MC_POST_RENDER,    mod.onRender)
 mod:AddCallback(ModCallbacks.MC_EXECUTE_CMD,    mod.onCommand)
 
 mod:AddCallback(ModCallbacks.MC_POST_GAME_STARTED, function()
+  -- Authoritative load for the run: the save slot is definitely active here.
   loadConfig()
+  runConfigLoaded = true
   if cfg.enabled then revealRooms() end
 end)
 

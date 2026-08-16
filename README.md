@@ -116,8 +116,12 @@ to get a **Secrets Reveal** category with:
 * *Keys* — rebind F5 and F6, or clear them entirely
 * *Reset* — put the colours, or every setting, back to default
 
-Without Mod Config Menu the defaults apply (everything on). Settings are saved
-per-mod, so they survive restarts either way.
+Without Mod Config Menu the defaults apply (everything on).
+
+Settings are stored through Isaac's `SaveData`, which writes `save<slot>.dat`
+into the mod folder. That is **per save slot**, so each of the three slots
+keeps its own settings and a slot you have not configured starts from the
+defaults.
 
 ## Notes and limits
 
@@ -159,5 +163,10 @@ powershell -ExecutionPolicy Bypass -File tools\make_markers.ps1
 so those assets never get bundled into a Workshop upload:
 
 ```
-robocopy . "<mods>\secrets-reveal_3780562693" /MIR /XD .git workshop
+robocopy . "<mods>\secrets-reveal" /MIR /XD .git workshop /XF save*.dat disable.it
 ```
+
+`/XF` matters. Isaac writes the mod's settings to `save<slot>.dat` **inside the
+mod folder**, and the game writes `disable.it` there when the mod is switched
+off in the Mods menu. Neither is in the repo, so a bare `/MIR` deletes both —
+silently wiping the player's settings on every sync.
